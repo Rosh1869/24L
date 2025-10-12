@@ -292,6 +292,7 @@ export default function Home() {
           </table>
         </div>
       </div>
+      <div>Made with ❤️ by {"Roshan"}</div>
     </div>
   );
 }
