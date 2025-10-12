@@ -278,13 +278,13 @@ export default function Home() {
                   Total Amount
                 </td>
                 <td className="border px-1 py-1 font-bold sm:px-2">
+                  £{" "}
                   {(
                     worklogs.reduce(
                       (sum, log) => sum + (Number(log.hours) || 0),
                       0,
                     ) * 6
                   ).toFixed(2)}{" "}
-                  £
                 </td>
                 <td className="border px-1 py-1 sm:px-2"></td>
               </tr>
