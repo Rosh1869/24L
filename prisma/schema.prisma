@@ -15,7 +15,6 @@ datasource db {
 
 model Worklog {
   id          String   @id @default(cuid())
-  title       String
   description String?
   date        DateTime @default(now())
   startTime   DateTime

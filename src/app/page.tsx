@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -197,37 +198,51 @@ export default function Home() {
               </tr>
             </thead>
             <tbody>
-              {worklogs.map((log) => (
-                <tr key={log.id}>
-                  <td className="border px-1 py-1 sm:px-2">
-                    {new Date(log.date).toLocaleDateString()}
-                  </td>
-                  <td className="border px-1 py-1 sm:px-2">
-                    {new Date(log.startTime).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </td>
-                  <td className="border px-1 py-1 sm:px-2">
-                    {new Date(log.endTime).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </td>
-                  <td className="border px-1 py-1 sm:px-2">
-                    {Number(log.hours).toFixed(2)}
-                  </td>
-                  <td className="border px-1 py-1 sm:px-2">
-                    <button
-                      className="text-red-600 hover:underline"
-                      onClick={() => handleDelete(log.id)}
-                      type="button"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {[...worklogs]
+                .sort(
+                  (a: Worklog, b: Worklog) =>
+                    new Date(a.date).getTime() - new Date(b.date).getTime(),
+                ) // Sorts by date descending
+                .map((log) => (
+                  <tr key={log.id}>
+                    <td className="border px-1 py-1 sm:px-2">
+                      {(() => {
+                        const date = new Date(log.date);
+                        const day = String(date.getDate()).padStart(2, "0");
+                        const month = String(date.getMonth() + 1).padStart(
+                          2,
+                          "0",
+                        );
+                        const year = date.getFullYear();
+                        return `${day}/${month}/${year}`;
+                      })()}
+                    </td>
+                    <td className="border px-1 py-1 sm:px-2">
+                      {new Date(log.startTime).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </td>
+                    <td className="border px-1 py-1 sm:px-2">
+                      {new Date(log.endTime).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </td>
+                    <td className="border px-1 py-1 sm:px-2">
+                      {Number(log.hours).toFixed(2)} hrs
+                    </td>
+                    <td className="border px-1 py-1 sm:px-2">
+                      <button
+                        className="text-red-600 hover:underline"
+                        onClick={() => handleDelete(log.id)}
+                        type="button"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               {worklogs.length === 0 && (
                 <tr>
                   <td
@@ -250,7 +265,8 @@ export default function Home() {
                 <td className="border px-1 py-1 font-bold sm:px-2">
                   {worklogs
                     .reduce((sum, log) => sum + (Number(log.hours) || 0), 0)
-                    .toFixed(2)}
+                    .toFixed(2)}{" "}
+                  hrs
                 </td>
                 <td className="border px-1 py-1 sm:px-2"></td>
               </tr>
@@ -267,7 +283,8 @@ export default function Home() {
                       (sum, log) => sum + (Number(log.hours) || 0),
                       0,
                     ) * 6
-                  ).toFixed(2)}
+                  ).toFixed(2)}{" "}
+                  £
                 </td>
                 <td className="border px-1 py-1 sm:px-2"></td>
               </tr>
