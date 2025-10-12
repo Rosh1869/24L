@@ -1,5 +1,7 @@
 "use client";
 
+export const runtime = "nodejs"; // Important for Prisma
+
 import {
   Card,
   CardContent,
