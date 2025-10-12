@@ -15,14 +15,22 @@ import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useState } from "react";
 import { neon } from "@neondatabase/serverless";
 
+// Add Worklog type
+type Worklog = {
+  id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  hours: number;
+};
+
 export default function Home() {
-  const [today, setToday] = useState("");
+  const [, setToday] = useState("");
   const [date, setDate] = useState("");
   const [from, setFrom] = useState("18:00");
   const [to, setTo] = useState("19:00");
-  const [data, setData] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [worklogs, setWorklogs] = useState<any[]>([]);
+  const [worklogs, setWorklogs] = useState<Worklog[]>([]);
 
   useEffect(() => {
     const now = new Date();
@@ -40,11 +48,19 @@ export default function Home() {
     }
     const sql = neon(process.env.DATABASE_URL as string);
     const logs = await sql`
-      SELECT "id", "title", "date", "startTime", "endTime", "hours"
+      SELECT "id", "date", "startTime", "endTime", "hours"
       FROM "Worklog"
       ORDER BY "date" DESC, "startTime" DESC
     `;
-    setWorklogs(logs);
+    setWorklogs(
+      logs.map((log) => ({
+        id: log.id,
+        date: log.date,
+        startTime: log.startTime,
+        endTime: log.endTime,
+        hours: Number(log.hours),
+      })),
+    );
   }, []);
 
   useEffect(() => {
@@ -69,7 +85,6 @@ export default function Home() {
 
       // Prepare values
       const id = uuidv4();
-      const title = "Work log";
       const dateObj = new Date(date);
 
       // Combine date and time for startTime and endTime
