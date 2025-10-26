@@ -18,7 +18,6 @@ import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { neon } from "@neondatabase/serverless";
 import { Copy, Send, Trash } from "lucide-react";
-import jsPDF from "jspdf";
 import { exportWorklogPDF } from "@/lib/pdfExport";
 
 // Add Worklog type
@@ -55,13 +54,7 @@ function formatDateDisplay(isoDate: string) {
   const year = d.getFullYear();
   return `${day}/${month}/${year}`;
 }
-function formatTimeDisplay(isoString: string) {
-  return new Date(isoString).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false, // enforce 24-hour format
-  });
-}
+
 function formatTime12hr(isoString: string) {
   return new Date(isoString).toLocaleTimeString([], {
     hour: "2-digit",
