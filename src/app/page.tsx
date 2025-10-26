@@ -18,6 +18,8 @@ import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { neon } from "@neondatabase/serverless";
 import { Copy, Send, Trash } from "lucide-react";
+import jsPDF from "jspdf";
+import { exportWorklogPDF } from "@/lib/pdfExport";
 
 // Add Worklog type
 type Worklog = {
@@ -59,6 +61,16 @@ function formatTimeDisplay(isoString: string) {
     minute: "2-digit",
     hour12: false, // enforce 24-hour format
   });
+}
+function formatTime12hr(isoString: string) {
+  return new Date(isoString).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+function getDayOfWeek(isoDate: string) {
+  return new Date(isoDate).toLocaleDateString("en-GB", { weekday: "long" });
 }
 
 export default function Home() {
@@ -306,6 +318,13 @@ export default function Home() {
                 </div>
               );
             }
+
+            // PDF Export Handler
+            function handleExportPDF(monthKey: string) {
+              const group = groupedByMonth[monthKey];
+              exportWorklogPDF(group, monthKey);
+            }
+
             return monthKeys.map((monthKey) => {
               const group = groupedByMonth[monthKey];
               const { hours: H, minutes: M } = toHoursAndMinutes(
@@ -313,11 +332,24 @@ export default function Home() {
               );
               return (
                 <div key={monthKey} className="mb-8">
-                  <div className="mb-2 font-semibold">{group.displayMonth}</div>
+                  <div className="mb-2 flex items-center justify-between font-semibold">
+                    <span>{group.displayMonth}</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      type="button"
+                      aria-label="Export PDF"
+                      className="ml-2"
+                      onClick={() => handleExportPDF(monthKey)}
+                    >
+                      Export PDF
+                    </Button>
+                  </div>
                   <table className="mb-2 min-w-full border text-xs sm:text-sm">
                     <thead>
                       <tr>
                         <th className="border px-1 py-1 sm:px-2">Date</th>
+                        <th className="border px-1 py-1 sm:px-2">Day</th>
                         <th className="border px-1 py-1 sm:px-2">Start</th>
                         <th className="border px-1 py-1 sm:px-2">End</th>
                         <th className="border px-1 py-1 sm:px-2">Hours</th>
@@ -329,15 +361,19 @@ export default function Home() {
                     <tbody>
                       {group.logs.map((log) => {
                         const displayDate = formatDateDisplay(log.date);
-                        const startTimeStr = formatTimeDisplay(log.startTime);
-                        const endTimeStr = formatTimeDisplay(log.endTime);
-                        const copyText = `${displayDate} ${startTimeStr} - ${endTimeStr}`;
+                        const dayOfWeek = getDayOfWeek(log.date);
+                        const startTimeStr = formatTime12hr(log.startTime);
+                        const endTimeStr = formatTime12hr(log.endTime);
+                        const copyText = `${displayDate} (${dayOfWeek}) ${startTimeStr} - ${endTimeStr}`;
                         const whatsappText = encodeURIComponent(copyText);
                         const hm = toHoursAndMinutes(Number(log.hours));
                         return (
                           <tr key={log.id}>
                             <td className="border px-1 py-1 sm:px-2">
                               {displayDate}
+                            </td>
+                            <td className="border px-1 py-1 sm:px-2">
+                              {dayOfWeek}
                             </td>
                             <td className="border px-1 py-1 sm:px-2">
                               {startTimeStr}
@@ -354,10 +390,10 @@ export default function Home() {
                                 size="sm"
                                 type="button"
                                 aria-label="Delete entry"
-                                className="flex items-center gap-1 text-red-600 hover:text-red-800"
+                                className="flex items-center text-red-600 hover:text-red-800"
                                 onClick={() => handleDelete(log.id)}
                               >
-                                <Trash className="mr-1 h-4 w-4" />
+                                <Trash className="h-4 w-4" />
                               </Button>
                             </td>
                             <td className="border px-1 py-1 sm:px-2">
@@ -396,7 +432,7 @@ export default function Home() {
                                   }
                                 }}
                               >
-                                <Send className="mr-1 inline h-4 w-4" />
+                                <Send className="inline h-4 w-4" />
                               </Button>
                             </td>
                           </tr>
@@ -407,7 +443,7 @@ export default function Home() {
                       <tr>
                         <td
                           className="border px-1 py-1 text-right font-bold sm:px-2"
-                          colSpan={3}
+                          colSpan={4}
                         >
                           Total
                         </td>
@@ -421,7 +457,7 @@ export default function Home() {
                       <tr>
                         <td
                           className="border px-1 py-1 text-right font-bold sm:px-2"
-                          colSpan={3}
+                          colSpan={4}
                         >
                           Amount
                         </td>
