@@ -8,12 +8,6 @@ type Worklog = {
   hours: number;
 };
 
-const HOURLY_RATE = 6;
-const GBP = new Intl.NumberFormat("en-GB", {
-  style: "currency",
-  currency: "GBP",
-});
-
 function toHoursAndMinutes(totalHoursNum: number) {
   const h = Math.trunc(totalHoursNum || 0);
   let m = Math.round(((totalHoursNum || 0) - h) * 60);
@@ -33,14 +27,6 @@ function formatDateDisplay(isoDate: string) {
   return `${day}/${month}/${year}`;
 }
 
-function formatTimeDisplay(isoString: string) {
-  return new Date(isoString).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-}
-
 function formatTime12hr(isoString: string) {
   return new Date(isoString).toLocaleTimeString([], {
     hour: "2-digit",
@@ -53,7 +39,7 @@ export function exportWorklogPDF(
   group: { logs: Worklog[]; totalHours: number; displayMonth: string },
   monthKey: string,
 ) {
-  let doc = new jsPDF();
+  const doc = new jsPDF();
   const name = "Roshan";
   doc.setFontSize(16);
   doc.text(`Monthly Report: ${group.displayMonth}`, 10, 15);
@@ -72,7 +58,7 @@ export function exportWorklogPDF(
   doc.text("Hours", 90, 42);
 
   let y = 48;
-  group.logs.forEach((log, idx) => {
+  group.logs.forEach((log) => {
     doc.text(formatDateDisplay(log.date), 10, y);
     doc.text(formatTime12hr(log.startTime), 40, y);
     doc.text(formatTime12hr(log.endTime), 65, y);
