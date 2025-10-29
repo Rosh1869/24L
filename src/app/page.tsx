@@ -19,6 +19,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { neon } from "@neondatabase/serverless";
 import { Copy, Send, Trash } from "lucide-react";
 import { exportWorklogPDF } from "@/lib/pdfExport";
+import {
+  toHoursAndMinutes,
+  formatDateDisplay,
+  formatTime12hr,
+  getDayOfWeek,
+} from "@/lib/worklogHelpers";
 
 // Add Worklog type
 type Worklog = {
@@ -30,41 +36,14 @@ type Worklog = {
 };
 
 // Constants
-const HOURLY_RATE = 6;
+const HOURLY_RATE =
+  typeof process.env.NEXT_PUBLIC_HOURLY_RATE !== "undefined"
+    ? Number(process.env.NEXT_PUBLIC_HOURLY_RATE)
+    : 12.5;
 const GBP = new Intl.NumberFormat("en-GB", {
   style: "currency",
   currency: "GBP",
 });
-
-// Helpers
-function toHoursAndMinutes(totalHoursNum: number) {
-  const h = Math.trunc(totalHoursNum || 0);
-  let m = Math.round(((totalHoursNum || 0) - h) * 60);
-  let H = h;
-  if (m === 60) {
-    H += 1;
-    m = 0;
-  }
-  return { hours: H, minutes: m };
-}
-function formatDateDisplay(isoDate: string) {
-  const d = new Date(isoDate);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
-}
-
-function formatTime12hr(isoString: string) {
-  return new Date(isoString).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
-function getDayOfWeek(isoDate: string) {
-  return new Date(isoDate).toLocaleDateString("en-GB", { weekday: "long" });
-}
 
 export default function Home() {
   // State
