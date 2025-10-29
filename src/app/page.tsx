@@ -37,8 +37,8 @@ type Worklog = {
 
 // Constants
 const HOURLY_RATE =
-  typeof process.env.NEXT_PUBLIC_HOURLY_RATE !== "undefined"
-    ? Number(process.env.NEXT_PUBLIC_HOURLY_RATE)
+  typeof process.env.HOURLY_RATE !== "undefined"
+    ? Number(process.env.HOURLY_RATE)
     : 12.5;
 const GBP = new Intl.NumberFormat("en-GB", {
   style: "currency",
